@@ -1,34 +1,30 @@
 # workshop-vscode
 
-OpenFaaS Workshop with in-browser version of VSCode from [coder.com](https://coder.com)
+Kubernetes Workshop with in-browser version of VSCode from [coder.com](https://coder.com)
 
-All tools are pre-installed with OpenFaaS on Kubernetes (k3s) available in the browser terminal.
+All tools are pre-installed with terraform available in the browser terminal.
 
 ## How it works
 
 1) A Virtual Machine will be provisioned with a cloud hosting provider using cloudinit
-2) [Kubernetes](https://kubernetes.io/) with [k3s](https://k3s.io/) will be installed on the VM
-3) [OpenFaaS](https://www.openfaas.com/) will be installed into the k3s cluster
-4) A Docker image will be run which provides [VSCode](https://k3s.io/) via a web-browser
-5) The login password for VSCode will be obtained via `ssh`
-6) VSCode can now be used in web-browser via your VM's IP. The self-signed certificate will provide encryption and the login password will protect against tampering.
+2) A Docker image will be run which provides [VSCode]() via a web-browser
+3) The login password for VSCode will be obtained via `ssh`
+4) VSCode can now be used in web-browser via your VM's IP. The self-signed certificate will provide encryption and the login password will protect against tampering.
 
 ## Why do we need this?
 
-This project provides a pre-installed Kubernetes environment within a VM so that your students can focus on your workshop.
+This project provides a pre-installed terraform environment within a VM so that your students can focus on your workshop.
 
-The example in this repository is for [The OpenFaaS Workshop](https://github.com/openfaas/workshop). It is estimated that it would save students 1.5-2 hours of set-up time. Instructors could also pre-provision a set amount of VMs ahead of time and then give out IP address and password combinations.
+The example in this repository is for [terraform-openstack-base-project-k8s](https://github.com/sdorsett/terraform-openstack-base-project-k8s). 
 
-## Steps to provision on DigitalOcean
+## Steps to provision using Terraform
 
-* [Get 100 USD free credit for 60 days](https://m.do.co/c/8d4e75e9886f)
-* Create a DigitalOcean VM size 4GB RAM in your local region
-* Add "user data" from `cloudinit.txt`
-* Pick "ssh" login or via root password over email
+* Install terraform
+* Create an openstack project, a user in that project and download the openrc.sh file for that created user
 * Locate the public IP given and navigate to `https://IP:8443`
 * You will need to accept the self-signed certificate, which will display as "insecure". Despite the warning, it will provide encryption for your connection.
 * You may have to wait for several minutes before the endpoint to comes up. See the second on Debugging if you want to check the logs.
-* Open a Terminal within VSCode and run through the files in ~/project/openfaas/
+* Open a Terminal within VSCode and run through the files in ~/project/terraform/
 * Next start the workshop from [Lab 2](https://github.com/openfaas/workshop#lab-2---test-things-out)
 
 ## Get your password

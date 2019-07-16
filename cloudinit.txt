@@ -3,71 +3,34 @@
 echo "tail -f /var/log/cloud-init-output.log" > /root/logs.sh
 chmod +x /root/logs.sh
 
-curl -SLs https://get.docker.com | sudo sh
-
 curl -SLs https://ident.me/ -o IP.txt
 export IP=$(cat IP.txt)
-export INSTALL_K3S_EXEC='server --tls-san '$IP''
 
-curl -sLS get.k3s.io | sh -
+curl -SLs https://get.docker.com | sudo sh
 
-mkdir -p /root/.kube/
+mkdir -p /home/coder/project/
+chmod 777 -R /home/coder/project/
+cp /tmp/openrc.sh /home/coder/project/
 
-cp /etc/rancher/k3s/k3s.yaml /root/.kube/config
-chmod 777 /root/.kube/config
+apt-get update
+apt-get install unzip -y
 
-mkdir -p /home/coder/project/openfaas \
-&& chmod 777 /home/coder/project/openfaas
-
-git clone https://github.com/openfaas/faas-netes
-cd faas-netes
-
-kubectl apply -f namespaces.yml
-
-# generate a random password
-export PASSWORD=$(head -c 12 /dev/urandom | shasum| cut -d' ' -f1)
-
-kubectl -n openfaas create secret generic basic-auth \
---from-literal=basic-auth-user=admin \
---from-literal=basic-auth-password="$PASSWORD"
-
-kubectl apply -f ./yaml/
-
-kubectl rollout status deploy/queue-worker -n openfaas
-kubectl rollout status deploy/gateway -n openfaas
-
-export OPENFAAS_URL=$IP:31112
-
-echo $PASSWORD > /home/coder/project/openfaas/04-gateway-password
-echo $OPENFAAS_URL > /home/coder/project/openfaas/03-gateway-url
-
-echo "export OPENFAAS_URL=$OPENFAAS_URL" | tee -a /home/coder/project/openfaas/01-add-to-bashrc.txt
-
-curl -SLs https://cli.openfaas.com | sh
-
-echo "echo -n $PASSWORD | faas-cli login -g $OPENFAAS_URL -u admin --password-stdin" > /home/coder/project/openfaas/02-run-this.txt
-
-chmod 777 -R /home/coder/project/openfaas
-
-# Run VSCode last
-
-sed -ie s/localhost/$IP/g /root/.kube/config
-chmod 777 /root/.kube/config
+wget https://releases.hashicorp.com/terraform/0.12.4/terraform_0.12.4_linux_amd64.zip
+unzip terraform_0.12.4_linux_amd64.zip
+mv terraform /usr/local/sbin/
 
 mkdir -p /root/certs
 
 # Generate self-signed cert
 
-openssl req -nodes -newkey rsa:2048 -keyout /root/certs/tmp-openfaas-ltd.key -out /root/certs/tmp-openfaas-ltd.crt -x509 -days 365  -subj "/C=UK/ST=CAMBS/L=Peterborough/O=OpenFaaS Ltd/OU=Workshop/CN=$IP"
+openssl req -nodes -newkey rsa:2048 -keyout /root/certs/tmp-terraform-vscode.key -out /root/certs/tmp-terraform-vscode.crt -x509 -days 365  -subj "/C=US/ST=TX/L=Dallas/O=OVHUS Core Service/OU=Terraform/CN=$IP"
 
 chown 1000 -R ~/certs/
 
 docker run --name vscode -v /root/certs:/home/coder/certs \
--v /home/coder/project/openfaas:/home/coder/project/openfaas \
--v /root/.kube/config:/home/coder/.kube/config \
--v /var/run/docker.sock:/var/run/docker.sock \
+-v /home/coder/project/:/home/coder/project/ \
+-v /usr/local/bin/terraform:/usr/local/bin/terraform \
 --privileged \
 -p 8443:8443 \
--d alexellis2/coder:0.2.0 --cert=/home/coder/certs/tmp-openfaas-ltd.crt --cert-key=/home/coder/certs/tmp-openfaas-ltd.key
-
+-d alexellis2/coder:0.2.0 --cert=/home/coder/certs/tmp-terraform-vscode.crt --cert-key=/home/coder/certs/tmp-terraform-vscode.key
 
